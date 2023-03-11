@@ -14,8 +14,9 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const lineItems = await Promise.all(
       products.map(async (product) => {
         const item = await strapi
-          .service("api::product.product")
-          .findOne(product.id);
+          .query("api::product.product")
+          // .service("api::product.product")
+          .findOne({ id: product.id });
         return {
           price_data: {
             currency: "usd",
@@ -24,7 +25,8 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
             },
             unit_amount: item.price * 100,
           },
-          quantity: item.quantity,
+          quantity: product.quantity,
+          // quantity: item.quantity,
         };
       })
     );
@@ -38,11 +40,12 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
         payment_method_types: ["card"],
       });
       console.log(strapi.service("api::order:order"));
-      await strapi.service("api::order:order").create({
-        data: {
-          products,
-          stripeId: session.id,
-        },
+      // await strapi.service("api::order:order").create({
+      await strapi.query("api::order:order").create({
+        // data: {
+        products,
+        stripeId: session.id,
+        // },
       });
       return { stripeSession: session };
     } catch (err) {
